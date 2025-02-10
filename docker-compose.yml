@@ -1,0 +1,17 @@
+services:
+  cronjob-replay:
+    container_name: cronjob-replay
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/root/logs
+    networks:
+      - cronjob-network
+
+networks:
+  cronjob-network:
+    driver: bridge
