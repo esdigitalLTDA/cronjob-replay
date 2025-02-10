@@ -25,6 +25,7 @@ TREASURY_PRIVATE_KEY=your_treasury_private_key_here  # Private key of the treasu
 
 # Slack Notifications
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/your/slack/webhook/url  # Slack Webhook URL for notifications
+SLACK_CHANNEL="#alerts"
 ```
 
 #### Running the Cronjob Locally

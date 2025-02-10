@@ -21,7 +21,6 @@ func main() {
 	minBalance, _ := strconv.ParseInt(os.Getenv("MIN_BALANCE"), 10, 64)
 	bridgeWalletAddress := os.Getenv("BRIDGE_WALLET_ADDRESS")
 	treasuryWalletAddress := os.Getenv("TREASURY_WALLET_ADDRESS")
-	slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL")
 
 	ethClient, err := ethclient.Dial(os.Getenv("ETH_NODE_URL"))
 	if err != nil {
@@ -40,10 +39,10 @@ func main() {
 
 	for {
 		// Ethereum balance check and transfer
-		checkAndTransfer(ethClient, bridgeWallet, treasuryWallet, minBalance, slackWebhookURL, "Ethereum")
+		checkAndTransfer(ethClient, bridgeWallet, treasuryWallet, minBalance, "Ethereum")
 
 		// Theta balance check and transfer
-		checkAndTransfer(thetaClient, bridgeWallet, treasuryWallet, minBalance, slackWebhookURL, "Theta")
+		checkAndTransfer(thetaClient, bridgeWallet, treasuryWallet, minBalance, "Theta")
 
 		// Wait for the next check interval
 		time.Sleep(time.Duration(checkIntervalHours) * time.Hour)

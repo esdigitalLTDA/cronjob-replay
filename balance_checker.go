@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func checkAndTransfer(client *ethclient.Client, bridgeWallet, treasuryWallet common.Address, minBalance int64, slackWebhookURL, network string) {
+func checkAndTransfer(client *ethclient.Client, bridgeWallet, treasuryWallet common.Address, minBalance int64, network string) {
 	// Check bridge wallet balance
 	balance, err := client.BalanceAt(context.Background(), bridgeWallet, nil)
 	if err != nil {
@@ -18,7 +18,8 @@ func checkAndTransfer(client *ethclient.Client, bridgeWallet, treasuryWallet com
 		return
 	}
 
-	fmt.Printf("%s bridge wallet balance: %s\n", network, weiToEther(balance).String())
+	balanceInEther := weiToEther(balance)
+	fmt.Printf("%s bridge wallet balance: %s ETH\n", network, balanceInEther.String())
 
 	if balance.Cmp(big.NewInt(minBalance)) < 0 {
 		fmt.Printf("Balance below minimum on %s, checking treasury balance...\n", network)
@@ -30,9 +31,17 @@ func checkAndTransfer(client *ethclient.Client, bridgeWallet, treasuryWallet com
 			return
 		}
 
+		treasuryBalanceInEther := weiToEther(treasuryBalance)
+
 		if treasuryBalance.Cmp(big.NewInt(0)) <= 0 {
 			// Notify Slack that treasury is out of balance
-			sendSlackNotification(slackWebhookURL, fmt.Sprintf("Treasury wallet on %s is out of balance!", network))
+			sendSlackNotification(fmt.Sprintf(
+				":warning: *ALERT* :warning:\n"+
+					"The *Treasury Wallet* on *%s* is out of balance!\n"+
+					"🔴 Current balance: *0 ETH*\n"+
+					"⚠️ Please investigate and fund the wallet immediately.",
+				network,
+			))
 			return
 		}
 
@@ -44,7 +53,17 @@ func checkAndTransfer(client *ethclient.Client, bridgeWallet, treasuryWallet com
 		}
 
 		// Notify Slack about the transfer
-		sendSlackNotification(slackWebhookURL, fmt.Sprintf("Transferred funds from treasury to bridge on %s. TxHash: %s", network, txHash))
+		sendSlackNotification(fmt.Sprintf(
+			":money_with_wings: *Funds Transferred Successfully!*\n"+
+				"Network: *%s*\n"+
+				"💰 Transferred from *Treasury Wallet* to *Bridge Wallet*.\n"+
+				"💲 Treasury Balance Before Transfer: *%s ETH*\n"+
+				"📜 Transaction Hash: `%s`\n"+
+				"✅ Please verify the transaction on the blockchain.",
+			network,
+			treasuryBalanceInEther.String(),
+			txHash,
+		))
 	}
 }
 
